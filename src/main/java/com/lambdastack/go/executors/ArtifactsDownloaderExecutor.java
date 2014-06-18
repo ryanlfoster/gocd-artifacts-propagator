@@ -12,7 +12,6 @@ public class ArtifactsDownloaderExecutor implements TaskExecutor {
 
     @Override
     public ExecutionResult execute(TaskConfig taskConfig, TaskExecutionContext taskExecutionContext) {
-        System.out.println("Sell");
         try {
             this.getDependencyResolver(taskExecutionContext).resolveDependencies().fetchArtifacts();
             return ExecutionResult.success("Artifacts downloaded successfully");
