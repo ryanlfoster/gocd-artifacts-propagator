@@ -3,14 +3,13 @@ package com.lambdastack.go.executors;
 
 import com.lambdastack.go.core.DependencyResolver;
 import com.lambdastack.go.models.Dependencies;
-import com.thoughtworks.go.plugin.api.response.execution.ExecutionResult;
 import com.thoughtworks.go.plugin.api.task.TaskExecutionContext;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertFalse;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
+
 
 public class ArtifactsDownloaderExecutorTest {
 
