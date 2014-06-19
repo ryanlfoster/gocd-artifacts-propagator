@@ -7,16 +7,16 @@ import com.lambdastack.go.models.ValueStreamMap;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.lambdastack.go.TestUtils.checkNodeAvailable;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ValueStreamMapTraversalEngineTest {
+public class ValueStreamMapTraversalEngineScenario2Test {
 
     ValueStreamMap valueStreamMap;
     ValueStreamLevel valueStreamLevel1;
@@ -39,25 +39,25 @@ public class ValueStreamMapTraversalEngineTest {
         valueStreamLevel5 = mock(ValueStreamLevel.class);
 
         String[] level1Parents = {};
-        String[] level2Parents = {};
-        String[] level3Parents = {};
-        String[] level4Parents = {"A", "B", "C"};
-        String[] level5Parents = {"D"};
+        String[] level2Parents = {"A"};
+        String[] level3Parents = {"B"};
+        String[] level4Parents = {"B"};
+        String[] level5Parents = {"C", "D"};
 
         String[] level1Dependents1 = {"A"};
-        String[] level1Dependents2 = {"D"};
+        String[] level1Dependents2 = {"B"};
 
         String[] level2Dependents1 = {"B"};
-        String[] level2Dependents2 = {"D"};
+        String[] level2Dependents2 = {"C", "D"};
 
         String[] level3Dependents1 = {"C"};
-        String[] level3Dependents2 = {"D"};
+        String[] level3Dependents2 = {"E"};
 
         String[] level4Dependents1 = {"D"};
         String[] level4Dependents2 = {"E"};
 
         String[] level5Dependents1 = {"D"};
-        String[] level5Dependents2 = {"E"};
+        String[] level5Dependents2 = {};
 
 
         Instance[] level1Instances = {};
@@ -122,72 +122,22 @@ public class ValueStreamMapTraversalEngineTest {
     public void shouldGetUpstreamPipelinesAfterApplyingFilters1() throws Exception {
         // Scenario 1:
 
-        // A ---+
-        //      |
-        // B ---> ----> D ---> E
-        //      |
-        // C ---+
-
-        // Current pipeline is D
-        // It should return A, B, C as the upstream pipelines
-
-        when(valueStreamMap.getCurrentPipeline()).thenReturn("D");
-        List<String> expectedNodes = Arrays.asList("A", "B", "C");
-
-        List<Node> upstreamPipelines = valueStreamMapTraversalEngine.getUpstreamPipelines();
-        assertEquals(expectedNodes.size(), upstreamPipelines.size());
-
-        assertTrue(checkNodeAvailable(upstreamPipelines, expectedNodes));
-    }
-
-    @Test
-    public void shouldGetUpstreamPipelinesAfterApplyingFilters2() throws Exception {
-        // Scenario 2:
-
-        // A ---+
-        //      |
-        // B ---> ----> D ---> E
-        //      |
-        // C ---+
-
-        // Current pipeline is B
-        // It should return empty list as the upstream pipelines
-
-        when(valueStreamMap.getCurrentPipeline()).thenReturn("B");
-
-        List<String> expectedNodes = new ArrayList<String>();
-
-        List<Node> upstreamPipelines = valueStreamMapTraversalEngine.getUpstreamPipelines();
-        assertEquals(expectedNodes.size(), upstreamPipelines.size());
-        assertTrue(checkNodeAvailable(upstreamPipelines, expectedNodes));
-    }
-
-    @Test
-    public void shouldGetUpstreamPipelinesAfterApplyingFilters3() throws Exception {
-        // Scenario 3:
-
-        // A ---+
-        //      |
-        // B ---> ----> D ---> E
-        //      |
-        // C ---+
-
+        //      +----->C-----+
+        //      |            |
+        //  A-->B            +-->E
+        //      |            |
+        //      +----->D-----+
         // Current pipeline is E
-        // It should return A,B,C,D as the upstream pipelines
+        // It should return A, B, C, D as the upstream pipelines
 
         when(valueStreamMap.getCurrentPipeline()).thenReturn("E");
         List<String> expectedNodes = Arrays.asList("A", "B", "C", "D");
 
         List<Node> upstreamPipelines = valueStreamMapTraversalEngine.getUpstreamPipelines();
         assertEquals(expectedNodes.size(), upstreamPipelines.size());
+
         assertTrue(checkNodeAvailable(upstreamPipelines, expectedNodes));
     }
 
-    private boolean checkNodeAvailable(List<Node> nodes, List<String> wantedNodes) {
-        List<String> actualNodes = new ArrayList<String>();
-        for(Node node : nodes) {
-            actualNodes.add(node.getId());
-        }
-        return actualNodes.containsAll(wantedNodes) && wantedNodes.containsAll(actualNodes);
-    }
 }
+
