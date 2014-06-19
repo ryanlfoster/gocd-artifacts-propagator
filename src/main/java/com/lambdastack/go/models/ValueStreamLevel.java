@@ -1,5 +1,12 @@
 package com.lambdastack.go.models;
 
-public class ValueStreamLevel {
+import com.google.api.client.util.Key;
 
+public class ValueStreamLevel {
+    @Key("nodes")
+    Node[] nodes;
+
+    public Node[] getNodes() {
+        return nodes;
+    }
 }
