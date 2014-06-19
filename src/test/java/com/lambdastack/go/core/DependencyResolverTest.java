@@ -6,7 +6,6 @@ import com.lambdastack.go.models.Node;
 import com.lambdastack.go.models.ValueStreamMap;
 import com.thoughtworks.go.plugin.api.task.EnvironmentVariables;
 import com.thoughtworks.go.plugin.api.task.TaskExecutionContext;
-import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -68,7 +67,6 @@ public class DependencyResolverTest {
     }
 
     @Test
-    @Ignore
     public void shouldResolveDependenciesFromValueStreamMap() throws Exception {
         ValueStreamMap valueStreamMap = mock(ValueStreamMap.class);
         List<Node> dependencies = Arrays.asList(mock(Node.class));
