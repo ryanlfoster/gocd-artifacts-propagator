@@ -6,6 +6,10 @@ public class Dependencies {
 
     List<Dependency> dependencyList;
 
+    public Dependencies(List<Node> upstreamPipelines) {
+
+    }
+
     public boolean fetchArtifacts() throws Exception{
         return true;
     }

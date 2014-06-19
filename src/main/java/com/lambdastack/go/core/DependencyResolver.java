@@ -19,14 +19,14 @@ public class DependencyResolver {
     }
 
     public Dependencies resolveDependencies() throws Exception {
-        return null;
+        return new Dependencies(getValueStreamMapTraversalEngine(fetchValueStreamMap()).getUpstreamPipelines());
     }
 
-    public ValueStreamMap fetchValueStreamMap() throws Exception {
+    protected ValueStreamMap fetchValueStreamMap() throws Exception {
         return getRestClient().getValueStreamMapFromGoServer(constructValueStreamMapUrl());
     }
 
-    public String constructValueStreamMapUrl() throws GoEnvironmentVariableNotFoundException {
+    protected String constructValueStreamMapUrl() throws GoEnvironmentVariableNotFoundException {
         return getEnvironmentVariable("GO_SERVER_URL") +
                 VALUE_STREAM_MAP_RESOURCE +
                 getEnvironmentVariable("GO_PIPELINE_NAME") +
@@ -50,5 +50,9 @@ public class DependencyResolver {
 
     protected TaskExecutionContext getTaskExecutionContext() {
         return taskExecutionContext;
+    }
+
+    protected ValueStreamMapTraversalEngine getValueStreamMapTraversalEngine(ValueStreamMap valueStreamMap) {
+        return new ValueStreamMapTraversalEngine(valueStreamMap);
     }
 }

@@ -2,17 +2,22 @@ package com.lambdastack.go.core;
 
 import com.lambdastack.go.RestClient;
 import com.lambdastack.go.exceptions.GoEnvironmentVariableNotFoundException;
+import com.lambdastack.go.models.Node;
 import com.lambdastack.go.models.ValueStreamMap;
 import com.thoughtworks.go.plugin.api.task.EnvironmentVariables;
 import com.thoughtworks.go.plugin.api.task.TaskExecutionContext;
+import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class DependencyResolverTest {
 
@@ -62,4 +67,16 @@ public class DependencyResolverTest {
         assertEquals(actualValueStreamMapURL, dependencyResolver.constructValueStreamMapUrl());
     }
 
+    @Test
+    @Ignore
+    public void shouldResolveDependenciesFromValueStreamMap() throws Exception {
+        ValueStreamMap valueStreamMap = mock(ValueStreamMap.class);
+        List<Node> dependencies = Arrays.asList(mock(Node.class));
+        ValueStreamMapTraversalEngine valueStreamMapTraversalEngine = mock(ValueStreamMapTraversalEngine.class);
+        when(dependencyResolver.resolveDependencies()).thenCallRealMethod();
+        when(dependencyResolver.fetchValueStreamMap()).thenReturn(valueStreamMap);
+        when(dependencyResolver.getValueStreamMapTraversalEngine(valueStreamMap)).thenReturn(valueStreamMapTraversalEngine);
+        when(valueStreamMapTraversalEngine.getUpstreamPipelines()).thenReturn(dependencies);
+//        assertSame(dependencies, dependencyResolver.resolveDependencies());
+    }
 }

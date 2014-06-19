@@ -27,4 +27,57 @@ public class Node {
 
     @Key("dependents")
     private String[] dependents;
+
+    public Node(String name,
+                String nodeType,
+                String locator,
+                String[] parents,
+                int depth,
+                Instance[] instances,
+                String id,
+                String[] dependents) {
+        this.name = name;
+        this.nodeType = nodeType;
+        this.locator = locator;
+        this.parents = parents;
+        this.depth = depth;
+        this.instances = instances;
+        this.id = id;
+        this.dependents = dependents;
+    }
+
+    public Node() {
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getNodeType() {
+        return nodeType;
+    }
+
+    public String getLocator() {
+        return locator;
+    }
+
+    public String[] getParents() {
+        return parents;
+    }
+
+    public int getDepth() {
+        return depth;
+    }
+
+    public Instance[] getInstances() {
+        return instances;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String[] getDependents() {
+        return dependents;
+    }
 }
