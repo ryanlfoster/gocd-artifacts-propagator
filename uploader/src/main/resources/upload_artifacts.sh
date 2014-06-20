@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -l
 
 set -e
 
@@ -18,11 +18,9 @@ if [ -f .artifacts_fetched_from_upstream ]; then
 fi
 
 zip -r artifacts.zip artifacts
+
 echo -e "Uploading artifacts to $CURRENT_PIPELINE_LOCATOR \n"
 curl -F zipfile=@artifacts.zip $CURRENT_PIPELINE_LOCATOR
-
-cp -r tmp_artifacts/* artifacts/.
-
-echo -e "Warming up the artifact cache for downstream pipelines \n"
+find tmp_artifacts -type f -exec mv {} artifacts/. \;
+echo -e "\n Warming up the artifact cache for downstream pipelines \n"
 curl $CURRENT_PIPELINE_LOCATOR/artifacts.zip
-exit 0

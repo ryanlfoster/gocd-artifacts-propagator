@@ -35,5 +35,4 @@ done
 ls -1 artifacts/* > .artifacts_fetched_from_upstream
 
 rm -rf tmp_artifacts
-
-exit 0
+echo -e "All upstream artifacts downloaded into WORKDIR/artifacts folder \n"

@@ -35,6 +35,8 @@ public class ArtifactsUploaderExecutor implements TaskExecutor {
             return ExecutionResult.success("Artifacts uploaded successfully");
         } catch (Exception e) {
             e.printStackTrace();
+            taskExecutionContext.console().printLine(e.getMessage());
+            taskExecutionContext.console().printLine(stackTraceToString(e));
             return ExecutionResult.failure("Uploading artifacts failed", e);
         }
     }
@@ -64,4 +66,13 @@ public class ArtifactsUploaderExecutor implements TaskExecutor {
         return mutableEnvironmentMap;
     }
 
+    public String stackTraceToString(Throwable e) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(e.getMessage());
+        for (StackTraceElement element : e.getStackTrace()) {
+            sb.append(element.toString());
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
 }
