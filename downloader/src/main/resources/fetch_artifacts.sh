@@ -9,26 +9,31 @@ set -e
 rm -rf artifacts
 mkdir artifacts
 
+rm -rf tmp_artifacts
+mkdir tmp_artifacts
+
 # What kind of API optimization is this? Return 202 and ask client to hit the same url again after sometime?
 function try_url
 {
     url=$1
     while [ `curl $url -w '%{response_code}' -so /dev/null` -eq 202 ]
     do
-        echo "GO just became lazy and returned 202. Retrying to fetch artifacts"
+        echo -e "GO just became lazy and returned 202. Retrying to fetch artifacts \n"
         sleep 2
     done
 }
 
 for url in `cat .artifacts_to_be_fetched`
 do
-    echo "Pulling artifacts from $url"
+    echo -e "Pulling artifacts from $url \n"
     try_url $url
     curl "$url" > tmp_artifacts/artifacts.zip
     [ $? -eq  0 ] && unzip tmp_artifacts/artifacts.zip
     rm -rf tmp_artifacts/*
 done
 
-ls -1 artifacts/* > .files_fetched_from_upstream
+ls -1 artifacts/* > .artifacts_fetched_from_upstream
 
 rm -rf tmp_artifacts
+
+exit 0
