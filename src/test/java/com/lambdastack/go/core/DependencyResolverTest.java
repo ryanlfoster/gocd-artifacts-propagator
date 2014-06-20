@@ -2,7 +2,11 @@ package com.lambdastack.go.core;
 
 import com.lambdastack.go.RestClient;
 import com.lambdastack.go.exceptions.GoEnvironmentVariableNotFoundException;
+import com.lambdastack.go.models.Dependencies;
+import com.lambdastack.go.models.Dependency;
+import com.lambdastack.go.models.Instance;
 import com.lambdastack.go.models.Node;
+import com.lambdastack.go.models.Stage;
 import com.lambdastack.go.models.ValueStreamMap;
 import com.thoughtworks.go.plugin.api.task.EnvironmentVariables;
 import com.thoughtworks.go.plugin.api.task.TaskExecutionContext;
@@ -11,10 +15,11 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -68,13 +73,61 @@ public class DependencyResolverTest {
 
     @Test
     public void shouldResolveDependenciesFromValueStreamMap() throws Exception {
+
+        String[] level1Parents = {};
+        String[] level2Parents = {};
+
+        String[] level1Dependents = {"D"};
+        String[] level2Dependents = {"D"};
+
+        Stage[] level1Stages = {new Stage("/go/pipelines/A/4/defaultStage/2","defaultStage", "Passed")};
+        Stage[] level2Stages = {new Stage("/go/pipelines/B/5/defaultStage/10","defaultStage", "Passed")};
+
+        Instance[] level1Instances = {
+                new Instance(level1Stages)
+        };
+        Instance[] level2Instances = {
+                new Instance(level2Stages)
+        };
+
+        Node[] nodes = {
+                new Node("A","PIPELINE",
+                        "/go/tab/pipeline/history/A",
+                        level1Parents, 1,
+                        level1Instances, "A", level1Dependents),
+                new Node("B","PIPELINE",
+                        "/go/tab/pipeline/history/B",
+                        level2Parents, 1,
+                        level2Instances, "B", level2Dependents)
+
+        };
+
+
         ValueStreamMap valueStreamMap = mock(ValueStreamMap.class);
-        List<Node> dependencies = Arrays.asList(mock(Node.class));
         ValueStreamMapTraversalEngine valueStreamMapTraversalEngine = mock(ValueStreamMapTraversalEngine.class);
-        when(dependencyResolver.resolveDependencies()).thenCallRealMethod();
+
+        when(dependencyResolver.getTaskExecutionContext()).thenReturn(taskExecutionContext);
         when(dependencyResolver.fetchValueStreamMap()).thenReturn(valueStreamMap);
         when(dependencyResolver.getValueStreamMapTraversalEngine(valueStreamMap)).thenReturn(valueStreamMapTraversalEngine);
-        when(valueStreamMapTraversalEngine.getUpstreamPipelines()).thenReturn(dependencies);
-//        assertSame(dependencies, dependencyResolver.resolveDependencies());
+        when(valueStreamMapTraversalEngine.getUpstreamPipelines()).thenReturn(Arrays.asList(nodes));
+        when(dependencyResolver.resolveDependencies()).thenCallRealMethod();
+
+        Dependencies actualDependencies = dependencyResolver.resolveDependencies();
+
+        assertNotNull(actualDependencies);
+        assertEquals(2, actualDependencies.getDependencyList().size());
+        assertTrue(checkDependencyExists(actualDependencies, "https://10.0.0.1:8154", "A", "/go/pipelines/A/4/defaultStage/2"));
+        assertTrue(checkDependencyExists(actualDependencies, "https://10.0.0.1:8154", "B", "/go/pipelines/B/5/defaultStage/10"));
+    }
+
+    private boolean checkDependencyExists(Dependencies actualDependencies, String goServerUrl, String pipelineName, String artifactURL) {
+        for (Dependency dependency : actualDependencies.getDependencyList()) {
+            if(dependency.getGoServerUrl().equals(goServerUrl)
+                    && dependency.getPipelineName().equals(pipelineName)
+                    && dependency.getLocator().equals(artifactURL)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

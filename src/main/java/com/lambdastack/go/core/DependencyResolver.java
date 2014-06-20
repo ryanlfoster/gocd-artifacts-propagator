@@ -19,7 +19,8 @@ public class DependencyResolver {
     }
 
     public Dependencies resolveDependencies() throws Exception {
-        return new Dependencies(getValueStreamMapTraversalEngine(fetchValueStreamMap()).getUpstreamPipelines());
+        return new Dependencies(getEnvironmentVariable("GO_SERVER_URL"),
+                                getValueStreamMapTraversalEngine(fetchValueStreamMap()).getUpstreamPipelines());
     }
 
     protected ValueStreamMap fetchValueStreamMap() throws Exception {
@@ -35,13 +36,17 @@ public class DependencyResolver {
     }
 
     private String getEnvironmentVariable(String key) throws GoEnvironmentVariableNotFoundException {
-        Map<String, String> environmentMap = getTaskExecutionContext().environment().asMap();
+        Map<String, String> environmentMap = getEnvironmentFromTaskExecutionContext();
         String valueForGivenKey = environmentMap.get(key);
         if(valueForGivenKey == null || valueForGivenKey.isEmpty()) {
             throw new GoEnvironmentVariableNotFoundException("Environment variable " + key + " has not value set");
         }
 
         return valueForGivenKey;
+    }
+
+    private Map<String, String> getEnvironmentFromTaskExecutionContext() {
+        return getTaskExecutionContext().environment().asMap();
     }
 
     protected RestClient getRestClient() {

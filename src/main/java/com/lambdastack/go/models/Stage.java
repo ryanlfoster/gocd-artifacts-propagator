@@ -11,4 +11,25 @@ public class Stage {
 
     @Key("status")
     private String status;
+
+    public String getLocator() {
+        return locator;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public Stage(String locator, String name, String status) {
+        this.locator = locator;
+        this.name = name;
+        this.status = status;
+    }
+
+    public Stage() {
+    }
 }

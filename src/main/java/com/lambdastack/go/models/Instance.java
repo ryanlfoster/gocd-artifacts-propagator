@@ -16,4 +16,14 @@ public class Instance {
     @Key("label")
     private String label;
 
+    public Stage[] getStages() {
+        return stages;
+    }
+
+    public Instance(Stage[] stages) {
+        this.stages = stages;
+    }
+
+    public Instance() {
+    }
 }
