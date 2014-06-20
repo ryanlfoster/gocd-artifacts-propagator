@@ -1,7 +1,6 @@
 package com.lambdastack.go.core;
 
 import com.lambdastack.go.RestClient;
-import com.lambdastack.go.exceptions.GoEnvironmentVariableNotFoundException;
 import com.lambdastack.go.models.Dependencies;
 import com.lambdastack.go.models.Dependency;
 import com.lambdastack.go.models.Instance;
@@ -63,11 +62,11 @@ public class DependencyResolverTest {
     }
 
     @Test
-    public void shouldConstructValueStreamMapURL() throws GoEnvironmentVariableNotFoundException {
+    public void shouldConstructValueStreamMapURL() throws Exception {
 
         when(dependencyResolver.constructValueStreamMapUrl()).thenCallRealMethod();
 
-        String actualValueStreamMapURL = "https://10.0.0.1:8154/go/pipelines/value_stream_map/C/7.json";
+        String actualValueStreamMapURL = "http://10.0.0.1:8153/go/pipelines/value_stream_map/C/7.json";
         assertEquals(actualValueStreamMapURL, dependencyResolver.constructValueStreamMapUrl());
     }
 
@@ -116,8 +115,8 @@ public class DependencyResolverTest {
 
         assertNotNull(actualDependencies);
         assertEquals(2, actualDependencies.getDependencyList().size());
-        assertTrue(checkDependencyExists(actualDependencies, "https://10.0.0.1:8154", "A", "/go/pipelines/A/4/defaultStage/2"));
-        assertTrue(checkDependencyExists(actualDependencies, "https://10.0.0.1:8154", "B", "/go/pipelines/B/5/defaultStage/10"));
+        assertTrue(checkDependencyExists(actualDependencies, "http://10.0.0.1:8153", "A", "/go/pipelines/A/4/defaultStage/2"));
+        assertTrue(checkDependencyExists(actualDependencies, "http://10.0.0.1:8153", "B", "/go/pipelines/B/5/defaultStage/10"));
     }
 
     private boolean checkDependencyExists(Dependencies actualDependencies, String goServerUrl, String pipelineName, String artifactURL) {

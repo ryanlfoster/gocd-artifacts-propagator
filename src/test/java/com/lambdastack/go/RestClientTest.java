@@ -8,6 +8,11 @@ import com.google.api.client.testing.http.MockLowLevelHttpRequest;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import com.lambdastack.go.models.ValueStreamMap;
 import org.junit.Test;
+import org.xml.sax.InputSource;
+
+import java.io.StringReader;
+import java.util.Arrays;
+import java.util.List;
 
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
@@ -195,5 +200,148 @@ public class RestClientTest {
         assertNotNull(valueStreamMap);
         assertEquals(valueStreamMap.getCurrentPipeline(), "B");
         assertEquals(valueStreamMap.getValueStreamLevels().length, 4);
+    }
+
+    @Test
+    public void shouldGetStageFeedsWhichContainsJobInformation() throws Exception {
+
+        // Sample content
+
+        // <?xml version="1.0" encoding="UTF-8"?>
+        //
+        // <stage name="Build" counter="1">
+        //   <link rel="self" href="http://y-ci-master.dnspam:8153/go/api/stages/29924.xml"/>
+        //   <id><![CDATA[urn:x-go.studios.thoughtworks.com:stage-id:Merchandise_Service:883:Build:1]]></id>
+        //   <pipeline name="Merchandise_Service" counter="883" label="883-master" href="http://y-ci-master.dnspam:8153/go/api/pipelines/// Merchandise_Service/18511.xml"/>
+        //   <updated>2014-06-19T19:13:31+02:00</updated>
+        //   <result>Passed</result>
+        //   <state>Completed</state>
+        //   <approvedBy><![CDATA[changes]]></approvedBy>
+        //   <jobs>
+        //     <job href="http://y-ci-master.dnspam:8153/go/api/jobs/39112.xml"/>
+        //   </jobs>
+        // </stage>
+
+
+
+        final String sampleContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "\n" +
+                "<stage name=\"Build\" counter=\"1\">\n" +
+                "  <link rel=\"self\" href=\"http://y-ci-master.dnspam:8153/go/api/stages/29924.xml\"/>\n" +
+                "  <id><![CDATA[urn:x-go.studios.thoughtworks.com:stage-id:Merchandise_Service:883:Build:1]]></id>\n" +
+                "  <pipeline name=\"Merchandise_Service\" counter=\"883\" label=\"883-master\" href=\"http://y-ci-master.dnspam:8153/go/api/pipelines/Merchandise_Service/18511.xml\"/>\n" +
+                "  <updated>2014-06-19T19:13:31+02:00</updated>\n" +
+                "  <result>Passed</result>\n" +
+                "  <state>Completed</state>\n" +
+                "  <approvedBy><![CDATA[changes]]></approvedBy>\n" +
+                "  <jobs>\n" +
+                "    <job href=\"http://y-ci-master.dnspam:8153/go/api/jobs/39112.xml\"/>\n" +
+                "    <job href=\"http://y-ci-master.dnspam:8153/go/api/jobs/39113.xml\"/>\n" +
+                "  </jobs>\n" +
+                "</stage>\n";
+
+        String goServerUrl = "http://10.0.0.1:8154";
+        String stageLocator = "/go/pipelines/A/4/defaultStage/2";
+
+        RestClient restClient = mock(RestClient.class);
+        InputSource inputSource = new InputSource(new StringReader(sampleContent));
+        when(restClient.getJobFeedInputSourceFromGoServer(goServerUrl + stageLocator + ".xml")).thenReturn(inputSource);
+        when(restClient.getStageFeed(goServerUrl, stageLocator)).thenCallRealMethod();
+        List<String> jobsFromStageFeed = restClient.getStageFeed(goServerUrl, stageLocator);
+
+        assertNotNull(jobsFromStageFeed);
+        assertEquals(2, jobsFromStageFeed.size());
+        List<String> expectedJobsFeeds = Arrays.asList("http://y-ci-master.dnspam:8153/go/api/jobs/39112.xml", "http://y-ci-master.dnspam:8153/go/api/jobs/39113.xml");
+        assertEquals(expectedJobsFeeds, jobsFromStageFeed);
+    }
+
+    @Test
+    public void shouldGetArtifactsURLFromJobFeeds() throws Exception {
+        // Sample content
+
+        // <?xml version="1.0" encoding="UTF-8"?>
+        //
+        // <job name="test">
+        //   <link rel="self" href="http://y-ci-master.dnspam:8153/go/api/jobs/39112.xml"/>
+        //   <id><![CDATA[urn:x-go.studios.thoughtworks.com:job-id:Merchandise_Service:883:Build:1:test]]></id>
+        //   <pipeline name="Merchandise_Service" counter="883" label="883-master"/>
+        //   <stage name="Build" counter="1" href="http://y-ci-master.dnspam:8153/go/api/stages/29924.xml"/>
+        //   <result>Passed</result>
+        //   <state>Completed</state>
+        //   <properties>
+        //     <property name="cruise_agent"><![CDATA[y-ci-slave1.dnspam]]></property>
+        //     <property name="cruise_job_duration"><![CDATA[481]]></property>
+        //     <property name="cruise_job_id"><![CDATA[39112]]></property>
+        //     <property name="cruise_job_result"><![CDATA[Passed]]></property>
+        //     <property name="cruise_pipeline_counter"><![CDATA[883]]></property>
+        //     <property name="cruise_pipeline_label"><![CDATA[883-master]]></property>
+        //     <property name="cruise_stage_counter"><![CDATA[1]]></property>
+        //     <property name="cruise_timestamp_01_scheduled"><![CDATA[2014-06-19T19:05:01+02:00]]></property>
+        //     <property name="cruise_timestamp_02_assigned"><![CDATA[2014-06-19T19:05:06+02:00]]></property>
+        //     <property name="cruise_timestamp_03_preparing"><![CDATA[2014-06-19T19:05:16+02:00]]></property>
+        //     <property name="cruise_timestamp_04_building"><![CDATA[2014-06-19T19:05:29+02:00]]></property>
+        //     <property name="cruise_timestamp_05_completing"><![CDATA[2014-06-19T19:13:08+02:00]]></property>
+        //     <property name="cruise_timestamp_06_completed"><![CDATA[2014-06-19T19:13:31+02:00]]></property>
+        //   </properties>
+        //   <agent uuid="7e6a2141-9946-48e8-9bf7-b114823ff4b0"/>
+        //   <artifacts baseUri="http://y-ci-master.dnspam:8153/go/files/Merchandise_Service/883/Build/1/test" pathFromArtifactRoot="pipelines/// Merchandise_Service/883/Build/1/test">
+        //     <artifact src="artifacts" dest="" type="file"/>
+        //   </artifacts>
+        //   <resources>
+        //     <resource>service</resource>
+        //   </resources>
+        //   <environmentvariables>
+        //     <variable name="CURRENT_BRANCH"><![CDATA[master]]></variable>
+        //     <variable name="DEPENDENCY_LABEL_PIPE"><![CDATA[GO_DEPENDENCY_LABEL_PIPE]]></variable>
+        //   </environmentvariables>
+        // </job>
+
+        String sampleContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "\n" +
+                "<job name=\"test\">\n" +
+                "  <link rel=\"self\" href=\"http://y-ci-master.dnspam:8153/go/api/jobs/39112.xml\"/>\n" +
+                "  <id><![CDATA[urn:x-go.studios.thoughtworks.com:job-id:Merchandise_Service:883:Build:1:test]]></id>\n" +
+                "  <pipeline name=\"Merchandise_Service\" counter=\"883\" label=\"883-master\"/>\n" +
+                "  <stage name=\"Build\" counter=\"1\" href=\"http://y-ci-master.dnspam:8153/go/api/stages/29924.xml\"/>\n" +
+                "  <result>Passed</result>\n" +
+                "  <state>Completed</state>\n" +
+                "  <properties>\n" +
+                "    <property name=\"cruise_agent\"><![CDATA[y-ci-slave1.dnspam]]></property>\n" +
+                "    <property name=\"cruise_job_duration\"><![CDATA[481]]></property>\n" +
+                "    <property name=\"cruise_job_id\"><![CDATA[39112]]></property>\n" +
+                "    <property name=\"cruise_job_result\"><![CDATA[Passed]]></property>\n" +
+                "    <property name=\"cruise_pipeline_counter\"><![CDATA[883]]></property>\n" +
+                "    <property name=\"cruise_pipeline_label\"><![CDATA[883-master]]></property>\n" +
+                "    <property name=\"cruise_stage_counter\"><![CDATA[1]]></property>\n" +
+                "    <property name=\"cruise_timestamp_01_scheduled\"><![CDATA[2014-06-19T19:05:01+02:00]]></property>\n" +
+                "    <property name=\"cruise_timestamp_02_assigned\"><![CDATA[2014-06-19T19:05:06+02:00]]></property>\n" +
+                "    <property name=\"cruise_timestamp_03_preparing\"><![CDATA[2014-06-19T19:05:16+02:00]]></property>\n" +
+                "    <property name=\"cruise_timestamp_04_building\"><![CDATA[2014-06-19T19:05:29+02:00]]></property>\n" +
+                "    <property name=\"cruise_timestamp_05_completing\"><![CDATA[2014-06-19T19:13:08+02:00]]></property>\n" +
+                "    <property name=\"cruise_timestamp_06_completed\"><![CDATA[2014-06-19T19:13:31+02:00]]></property>\n" +
+                "  </properties>\n" +
+                "  <agent uuid=\"7e6a2141-9946-48e8-9bf7-b114823ff4b0\"/>\n" +
+                "  <artifacts baseUri=\"http://y-ci-master.dnspam:8153/go/files/Merchandise_Service/883/Build/1/test\" pathFromArtifactRoot=\"pipelines/Merchandise_Service/883/Build/1/test\">\n" +
+                "    <artifact src=\"artifacts\" dest=\"\" type=\"file\"/>\n" +
+                "  </artifacts>\n" +
+                "  <resources>\n" +
+                "    <resource>service</resource>\n" +
+                "  </resources>\n" +
+                "  <environmentvariables>\n" +
+                "    <variable name=\"CURRENT_BRANCH\"><![CDATA[master]]></variable>\n" +
+                "    <variable name=\"DEPENDENCY_LABEL_PIPE\"><![CDATA[GO_DEPENDENCY_LABEL_PIPE]]></variable>\n" +
+                "  </environmentvariables>\n" +
+                "</job>";
+
+        String jobFeedURL = "http://10.0.0.1:8154/some.xml";
+
+        RestClient restClient = mock(RestClient.class);
+        InputSource inputSource = new InputSource(new StringReader(sampleContent));
+        when(restClient.getJobFeedInputSourceFromGoServer(jobFeedURL)).thenReturn(inputSource);
+        when(restClient.getArtifactURLsFromJobFeed(jobFeedURL)).thenCallRealMethod();
+        String expectedArtifactURLs = "http://y-ci-master.dnspam:8153/go/files/Merchandise_Service/883/Build/1/test";
+        String actualArtifactURLs = restClient.getArtifactURLsFromJobFeed(jobFeedURL);
+
+        assertNotNull(expectedArtifactURLs, actualArtifactURLs);
     }
 }

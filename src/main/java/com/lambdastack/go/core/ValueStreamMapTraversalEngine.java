@@ -25,11 +25,11 @@ public class ValueStreamMapTraversalEngine {
             Set<String> pipelineToLookForInNextCycle = new HashSet<String>();
             for(String nodeName: pipelinesToLook) {
                 Node node = getNodeFromValueStreamMap(nodeName);
-                if(node.getId() != valueStreamMap.getCurrentPipeline()){
+                if(node.getNodeType().equals("PIPELINE") && !node.getId().equals(valueStreamMap.getCurrentPipeline())){
                     upstreamPipelines.add(node);
                 }
 
-                if(node.getNodeType() == "PIPELINE") {
+                if(node.getNodeType().equals("PIPELINE")) {
                     pipelineToLookForInNextCycle.addAll(new HashSet<String>(Arrays.asList(node.getParents())));
                 }
             }
@@ -43,9 +43,10 @@ public class ValueStreamMapTraversalEngine {
     }
 
     private Node getNodeFromValueStreamMap(String nodeName) {
+
         for(ValueStreamLevel level : valueStreamMap.getValueStreamLevels()) {
             for(Node node : level.getNodes()) {
-                if(node.getId() == nodeName) {
+                if(node.getId().equals(nodeName)) {
                     return node;
                 }
             }
