@@ -16,7 +16,7 @@ mkdir tmp_artifacts
 function try_url
 {
     url=$1
-    while [ `curl $url -w '%{response_code}' -so /dev/null` -eq 202 ]
+    while [ `curl -u artifacts-propagator:Helpdesk $url -w '%{response_code}' -so /dev/null` -eq 202 ]
     do
         echo -e "GO just became lazy and returned 202. Retrying to fetch artifacts \n"
         sleep 2
@@ -27,7 +27,7 @@ for url in `cat .artifacts_to_be_fetched`
 do
     echo -e "Pulling artifacts from $url \n"
     try_url $url
-    curl "$url" > tmp_artifacts/artifacts.zip
+    curl -u artifacts-propagator:Helpdesk "$url" > tmp_artifacts/artifacts.zip
     [ $? -eq  0 ] && unzip tmp_artifacts/artifacts.zip
     rm -rf tmp_artifacts/*
 done

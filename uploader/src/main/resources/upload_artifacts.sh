@@ -20,7 +20,7 @@ fi
 zip -r artifacts.zip artifacts
 
 echo -e "Uploading artifacts to $CURRENT_PIPELINE_LOCATOR \n"
-curl -F zipfile=@artifacts.zip $CURRENT_PIPELINE_LOCATOR
+curl -u artifacts-propagator:Helpdesk -F zipfile=@artifacts.zip $CURRENT_PIPELINE_LOCATOR
 find tmp_artifacts -type f -exec mv {} artifacts/. \;
 echo -e "\n Warming up the artifact cache for downstream pipelines \n"
-curl $CURRENT_PIPELINE_LOCATOR/artifacts.zip
+curl -u artifacts-propagator:Helpdesk $CURRENT_PIPELINE_LOCATOR/artifacts.zip

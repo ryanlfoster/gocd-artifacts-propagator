@@ -66,7 +66,7 @@ public class DependencyResolverTest {
 
         when(dependencyResolver.constructValueStreamMapUrl()).thenCallRealMethod();
 
-        String actualValueStreamMapURL = "http://10.0.0.1:8153/go/pipelines/value_stream_map/C/7.json";
+        String actualValueStreamMapURL = "http://artifacts-propagator:Helpdesk@10.0.0.1:8153/go/pipelines/value_stream_map/C/7.json";
         assertEquals(actualValueStreamMapURL, dependencyResolver.constructValueStreamMapUrl());
     }
 

@@ -62,7 +62,7 @@ public class ArtifactsUploaderExecutor implements TaskExecutor {
             mutableEnvironmentMap.put(key, environmentMap.get(key));
         }
         URL goServerURL = new URL(environmentMap.get("GO_SERVER_URL"));
-        mutableEnvironmentMap.put("GO_SERVER_URL", "http://" + goServerURL.getHost() + ":8153/go/");
+        mutableEnvironmentMap.put("GO_SERVER_URL", "http://artifacts-propagator:Helpdesk@" + goServerURL.getHost() + ":8153/go/");
         return mutableEnvironmentMap;
     }
 
