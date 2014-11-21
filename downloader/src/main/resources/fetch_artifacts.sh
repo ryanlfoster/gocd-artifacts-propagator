@@ -7,10 +7,7 @@ set -e
 # 2. mkdir artifacts and pull *all artifacts* in this folder
 
 rm -rf artifacts
-mkdir artifacts
-
-rm -rf tmp_artifacts
-mkdir tmp_artifacts
+mkdir -p artifacts/pipelines
 
 # What kind of API optimization is this? Return 202 and ask client to hit the same url again after sometime?
 function try_url
@@ -22,17 +19,21 @@ function try_url
         sleep 2
     done
 }
+export -f try_url
 
-for url in `cat .artifacts_to_be_fetched`
-do
-    echo -e "Pulling artifacts from $url \n"
+function get_artifact
+{
+    url=$1    
+    pid=$BASHPID
+    echo -e "Pulling artifacts from $url PID: $pid \n"
     try_url $url
-    curl -u artifacts-propagator:Helpdesk "$url" > tmp_artifacts/artifacts.zip
-    [ $? -eq  0 ] && unzip tmp_artifacts/artifacts.zip
-    rm -rf tmp_artifacts/*
-done
+    curl -u artifacts-propagator:Helpdesk "$url" > /dev/shm/$pid.zip
+    [ $? -eq  0 ] && unzip -o /dev/shm/$pid.zip
+    rm -rf /dev/shm/$pid.zip
+}
+export -f get_artifact
 
-ls -1 artifacts/* > .artifacts_fetched_from_upstream
+cat .artifacts_to_be_fetched | parallel -j 17 --gnu get_artifact {} 
 
-rm -rf tmp_artifacts
+[ "$(ls -A artifacts)" ] && ls -1 artifacts/* > .artifacts_fetched_from_upstream
 echo -e "All upstream artifacts downloaded into WORKDIR/artifacts folder \n"
