@@ -11,7 +11,9 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.lambdastack.go.core.DependencyResolver;
 import com.lambdastack.go.models.ValueStreamMap;
+import org.apache.http.HttpHost;
 import org.apache.http.client.fluent.Content;
+import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -23,6 +25,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +43,7 @@ public class RestClient {
         GenericUrl requestUrl = new GenericUrl(url);
 
         HttpRequest request = httpRequestFactory.buildGetRequest(requestUrl);
+        request.getHeaders().setBasicAuthentication("artifacts-propagator", "Helpdesk");
         return request.execute().parseAs(ValueStreamMap.class);
     }
 
@@ -77,7 +81,11 @@ public class RestClient {
     }
 
     protected InputSource getJobFeedInputSourceFromGoServer(String jobFeedURL) throws Exception {
-        Content content = Request.Get(jobFeedURL).execute().returnContent();
+        URL feedURL = new URL(jobFeedURL);
+        Content content = Executor.newInstance()
+                                .auth(new HttpHost(feedURL.getHost(), feedURL.getPort()), "artifacts-propagator", "Helpdesk")
+                                .authPreemptive(new HttpHost(feedURL.getHost(), feedURL.getPort()))
+                                .execute(Request.Get(jobFeedURL)).returnContent();
 //        DependencyResolver.logMessage(content.asString());
         return new InputSource(new StringReader(content.asString()));
     }

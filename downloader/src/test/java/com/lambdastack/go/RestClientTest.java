@@ -7,10 +7,17 @@ import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.http.MockLowLevelHttpRequest;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import com.lambdastack.go.models.ValueStreamMap;
+import org.apache.http.HttpHost;
+import org.apache.http.client.fluent.Content;
+import org.apache.http.client.fluent.Executor;
+import org.apache.http.client.fluent.Request;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.junit.Test;
 import org.xml.sax.InputSource;
 
 import java.io.StringReader;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
@@ -343,5 +350,18 @@ public class RestClientTest {
         String actualArtifactURLs = restClient.getArtifactURLsFromJobFeed(jobFeedURL);
 
         assertNotNull(expectedArtifactURLs, actualArtifactURLs);
+    }
+
+    @Test
+    public void shouldTest() throws  Exception{
+        String jobFeedURL = "http://172.16.20.239:8153/go/pipelines/Chef_Repo/552/Build/3.xml";
+        URL feedURL = new URL(jobFeedURL);
+        DefaultHttpClient client = new DefaultHttpClient();
+        client.setRedirectStrategy(new LaxRedirectStrategy());
+        Content content = Executor.newInstance(client)
+                .auth(new HttpHost(feedURL.getHost(), feedURL.getPort()), "admin", "Helpdesk")
+                .authPreemptive(new HttpHost(feedURL.getHost(), feedURL.getPort()))
+                .execute(Request.Get(jobFeedURL)).returnContent();
+        System.out.println((content.asString()));
     }
 }
