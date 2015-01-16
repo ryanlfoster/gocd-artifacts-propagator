@@ -25,7 +25,7 @@ public class ValueStreamMapTraversalEngine {
             Set<String> pipelineToLookForInNextCycle = new HashSet<String>();
             for(String nodeName: pipelinesToLook) {
                 Node node = getNodeFromValueStreamMap(nodeName);
-                if(node.getNodeType().equals("PIPELINE") && !node.getId().equals(valueStreamMap.getCurrentPipeline())){
+                if(node.getNodeType().equals("PIPELINE")){
                     upstreamPipelines.add(node);
                 }
 

@@ -3,7 +3,7 @@
 <go-plugin id="com.lambdastack.go.gocd-artifacts-propagator-downloader" version="1.0-SNAPSHOT">
     <about>
         <name>Go Artifacts Propagator Plugin - Downloader</name>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.1-SNAPSHOT</version>
         <target-go-version>14.1.0</target-go-version>
         <description>
             Go plugin to propagate artifacts downstream into $WORKSPACE/artifacts without the explicit need to "Fetch Artifacts" manually.

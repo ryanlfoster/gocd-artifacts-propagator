@@ -131,7 +131,7 @@ public class ValueStreamMapTraversalEngineScenario2Test {
         // It should return A, B, C, D as the upstream pipelines
 
         when(valueStreamMap.getCurrentPipeline()).thenReturn("E");
-        List<String> expectedNodes = Arrays.asList("A", "B", "C", "D");
+        List<String> expectedNodes = Arrays.asList("A", "B", "C", "D", "E");
 
         List<Node> upstreamPipelines = valueStreamMapTraversalEngine.getUpstreamPipelines();
         assertEquals(expectedNodes.size(), upstreamPipelines.size());

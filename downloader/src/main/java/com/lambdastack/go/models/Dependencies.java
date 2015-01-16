@@ -32,10 +32,12 @@ public class Dependencies {
     private void processNode(Node node) throws UpstreamPipelineBrokenException {
         for(Instance instance : node.getInstances()){
             for(Stage stage : instance.getStages()){
-                if(!stage.getStatus().equals("Passed")){
+                if(stage.getStatus().equals("Failed") ){
                     throw new UpstreamPipelineBrokenException("Upstream " + node.getId() + " is failing");
                 }
-                dependencyList.add(new Dependency(goServerURL, node.getId(), stage.getLocator()));
+                else if (stage.getStatus().equals("Passed"))
+                    dependencyList.add(new Dependency(goServerURL, node.getId(), stage.getLocator()));
+
             }
         }
     }

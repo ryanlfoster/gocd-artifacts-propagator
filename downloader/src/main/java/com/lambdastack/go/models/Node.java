@@ -2,6 +2,8 @@ package com.lambdastack.go.models;
 
 import com.google.api.client.util.Key;
 
+import java.util.Arrays;
+
 public class Node {
 
     @Key("name")
