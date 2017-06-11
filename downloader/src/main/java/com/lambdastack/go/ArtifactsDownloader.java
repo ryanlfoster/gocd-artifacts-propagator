@@ -23,8 +23,35 @@ public class ArtifactsDownloader implements GoPlugin {
     public static final String ADDITIONAL_OPTIONS = "AdditionalOptions";
     static Logger logger = Logger.getLoggerFor(ArtifactsDownloader.class);
 
+//    @Override
+//    public TaskConfig config() {
+//        TaskConfig config = new TaskConfig();
+//        return config;
+//    }
+//
+//    @Override
+//    public TaskExecutor executor() {
+//        return new ArtifactsDownloaderExecutor();
+//    }
+//
+//    @Override
+//    public TaskView view() {
+//        return new ArtifactsDownloaderView();
+//    }
+//
+//    @Override
+//    public ValidationResult validate(TaskConfig taskConfig) {
+//        return new ValidationResult(); // No errors added to it.
+//    }
+//
+//    @Override
+//    public void setPluginDescriptor(PluginDescriptor pluginDescriptor) {
+//        this.pluginDescriptor = pluginDescriptor;
+//    }
+
     @Override
     public void initializeGoApplicationAccessor(GoApplicationAccessor goApplicationAccessor) {
+
     }
 
     @Override
@@ -73,7 +100,7 @@ public class ArtifactsDownloader implements GoPlugin {
     private GoPluginApiResponse handleTaskExecution(GoPluginApiRequest request) throws IOException {
         int responseCode = DefaultGoPluginApiResponse.SUCCESS_RESPONSE_CODE;
         ArtifactsDownloaderExecutor executor = new ArtifactsDownloaderExecutor();
-        Map executionRequest = new JacksonFactory().fromString(request.requestBody(), Map.class);
+        Map executionRequest = (Map) new JacksonFactory().fromString(request.requestBody(), Object.class);
         Map context = (Map) executionRequest.get("context");
 
         try {

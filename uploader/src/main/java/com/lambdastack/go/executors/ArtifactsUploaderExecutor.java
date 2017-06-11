@@ -1,10 +1,8 @@
 package com.lambdastack.go.executors;
 
+import com.lambdastack.go.ArtifactsUploader;
 import com.lambdastack.go.core.ScriptRunner;
 import com.thoughtworks.go.plugin.api.response.execution.ExecutionResult;
-import com.thoughtworks.go.plugin.api.task.TaskConfig;
-import com.thoughtworks.go.plugin.api.task.TaskExecutionContext;
-import com.thoughtworks.go.plugin.api.task.TaskExecutor;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -14,20 +12,19 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ArtifactsUploaderExecutor implements TaskExecutor {
+public class ArtifactsUploaderExecutor {
 
-    private static TaskExecutionContext taskExecutionContext;
+    private static Map map;
 
-    @Override
-    public ExecutionResult execute(TaskConfig taskConfig, TaskExecutionContext taskExecutionContext) {
-        this.taskExecutionContext = taskExecutionContext;
+    public ExecutionResult execute(Map context) {
+        this.map = context;
         try {
-            String serverUrl = getEnvironmentVariable(taskExecutionContext, "GO_SERVER_URL");
-            String pipeline = getEnvironmentVariable(taskExecutionContext, "GO_PIPELINE_NAME");
-            String pipelineCounter = getEnvironmentVariable(taskExecutionContext, "GO_PIPELINE_COUNTER");
-            String stage = getEnvironmentVariable(taskExecutionContext, "GO_STAGE_NAME");
-            String stageCounter = getEnvironmentVariable(taskExecutionContext, "GO_STAGE_COUNTER");
-            String job = getEnvironmentVariable(taskExecutionContext, "GO_JOB_NAME");
+            String serverUrl = getEnvironmentVariable(context, "GO_SERVER_URL");
+            String pipeline = getEnvironmentVariable(context, "GO_PIPELINE_NAME");
+            String pipelineCounter = getEnvironmentVariable(context, "GO_PIPELINE_COUNTER");
+            String stage = getEnvironmentVariable(context, "GO_STAGE_NAME");
+            String stageCounter = getEnvironmentVariable(context, "GO_STAGE_COUNTER");
+            String job = getEnvironmentVariable(context, "GO_JOB_NAME");
             String workingDir = System.getProperty("user.dir") + "/pipelines/" + pipeline;
             String artifactURL = serverUrl + "files/" + pipeline + "/" + pipelineCounter + "/" + stage + "/" + stageCounter + "/" + job;
             basicSetup(workingDir);
@@ -35,14 +32,10 @@ public class ArtifactsUploaderExecutor implements TaskExecutor {
             return ExecutionResult.success("Artifacts uploaded successfully");
         } catch (Exception e) {
             e.printStackTrace();
-            taskExecutionContext.console().printLine(e.getMessage());
-            taskExecutionContext.console().printLine(stackTraceToString(e));
+            ArtifactsUploader.log(e.getMessage());
+            ArtifactsUploader.log(stackTraceToString(e));
             return ExecutionResult.failure("Uploading artifacts failed", e);
         }
-    }
-
-    public static void logMessage(String message) {
-        taskExecutionContext.console().printLine(message);
     }
 
     private void basicSetup(String workingDir) throws IOException {
@@ -51,12 +44,12 @@ public class ArtifactsUploaderExecutor implements TaskExecutor {
         FileUtils.copyURLToFile(artifactUploadingShellScriptURL, dest);
     }
 
-    private String getEnvironmentVariable(TaskExecutionContext context, String variable) throws Exception {
-        return this.constructEnvironmentVariable(context, variable).get(variable);
+    private String getEnvironmentVariable(Map context, String variable) throws Exception {
+        return this.constructEnvironmentVariable(context).get(variable);
     }
 
-    private Map<String, String> constructEnvironmentVariable(TaskExecutionContext context, String variable) throws Exception {
-        Map<String, String> environmentMap = context.environment().asMap();
+    private Map<String, String> constructEnvironmentVariable(Map context) throws Exception {
+        Map<String, String> environmentMap = (Map<String, String>) context.get("environmentVariables");
         Map<String, String> mutableEnvironmentMap = new HashMap<String, String>();
         for (String key : environmentMap.keySet()) {
             mutableEnvironmentMap.put(key, environmentMap.get(key));
