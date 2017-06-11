@@ -1,5 +1,6 @@
 package com.lambdastack.go.core;
 
+import com.lambdastack.go.ArtifactsDownloader;
 import com.lambdastack.go.exceptions.ScriptRunnerException;
 
 import java.io.BufferedReader;
@@ -23,7 +24,7 @@ public class ScriptRunner {
 
         System.out.println("Running script " + script + " in " + workingDir);
         while ((line = br.readLine()) != null) {
-            DependencyResolver.logMessage(line);
+            ArtifactsDownloader.log(line);
         }
         process.waitFor();
         if(process.exitValue() != 0) {

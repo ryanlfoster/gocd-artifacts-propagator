@@ -1,14 +1,7 @@
 package com.lambdastack.go.core;
 
 import com.lambdastack.go.RestClient;
-import com.lambdastack.go.models.Dependencies;
-import com.lambdastack.go.models.Dependency;
-import com.lambdastack.go.models.Instance;
-import com.lambdastack.go.models.Node;
-import com.lambdastack.go.models.Stage;
-import com.lambdastack.go.models.ValueStreamMap;
-import com.thoughtworks.go.plugin.api.task.EnvironmentVariables;
-import com.thoughtworks.go.plugin.api.task.TaskExecutionContext;
+import com.lambdastack.go.models.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,27 +18,26 @@ import static org.mockito.Mockito.when;
 public class DependencyResolverTest {
 
     DependencyResolver dependencyResolver;
-    TaskExecutionContext taskExecutionContext;
-    EnvironmentVariables environmentVariables;
+    HashMap taskExecutionContext;
+    HashMap environmentVariables;
     Map<String, String> environmentVariablesMap;
 
     @Before
     public void setUp() {
         dependencyResolver = mock(DependencyResolver.class);
-        taskExecutionContext = mock(TaskExecutionContext.class);
-        environmentVariables = mock(EnvironmentVariables.class);
+        taskExecutionContext = new HashMap();
+        environmentVariables = new HashMap();
+
 
         when(dependencyResolver.getTaskExecutionContext()).thenReturn(taskExecutionContext);
-
         environmentVariablesMap = new HashMap<String, String>();
-        environmentVariablesMap.put("GO_SERVER_URL","https://10.0.0.1:8154/go/");
+        environmentVariablesMap.put("GO_SERVER_URL", "https://10.0.0.1:8154/go/");
         environmentVariablesMap.put("GO_PIPELINE_NAME", "C");
         environmentVariablesMap.put("GO_PIPELINE_COUNTER", "7");
         environmentVariablesMap.put("GO_STAGE_NAME", "Build");
         environmentVariablesMap.put("GO_STAGE_COUNTER", "1");
 
-        when(taskExecutionContext.environment()).thenReturn(environmentVariables);
-        when(environmentVariables.asMap()).thenReturn(environmentVariablesMap);
+        taskExecutionContext.put("environmentVariables", environmentVariablesMap);
     }
 
     @Test
@@ -79,8 +71,8 @@ public class DependencyResolverTest {
         String[] level1Dependents = {"D"};
         String[] level2Dependents = {"D"};
 
-        Stage[] level1Stages = {new Stage("/go/pipelines/A/4/defaultStage/2","defaultStage", "Passed")};
-        Stage[] level2Stages = {new Stage("/go/pipelines/B/5/defaultStage/10","defaultStage", "Passed")};
+        Stage[] level1Stages = {new Stage("/go/pipelines/A/4/defaultStage/2", "defaultStage", "Passed")};
+        Stage[] level2Stages = {new Stage("/go/pipelines/B/5/defaultStage/10", "defaultStage", "Passed")};
 
         Instance[] level1Instances = {
                 new Instance(level1Stages)
@@ -90,11 +82,11 @@ public class DependencyResolverTest {
         };
 
         Node[] nodes = {
-                new Node("A","PIPELINE",
+                new Node("A", "PIPELINE",
                         "/go/tab/pipeline/history/A",
                         level1Parents, 1,
                         level1Instances, "A", level1Dependents),
-                new Node("B","PIPELINE",
+                new Node("B", "PIPELINE",
                         "/go/tab/pipeline/history/B",
                         level2Parents, 1,
                         level2Instances, "B", level2Dependents)
@@ -121,7 +113,7 @@ public class DependencyResolverTest {
 
     private boolean checkDependencyExists(Dependencies actualDependencies, String goServerUrl, String pipelineName, String artifactURL) {
         for (Dependency dependency : actualDependencies.getDependencyList()) {
-            if(dependency.getGoServerUrl().equals(goServerUrl)
+            if (dependency.getGoServerUrl().equals(goServerUrl)
                     && dependency.getPipelineName().equals(pipelineName)
                     && dependency.getLocator().equals(artifactURL)) {
                 return true;
