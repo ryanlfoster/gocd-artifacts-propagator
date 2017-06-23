@@ -1,7 +1,7 @@
 package com.lambdastack.go.core;
 
+import com.lambdastack.go.ArtifactsUploader;
 import com.lambdastack.go.exceptions.ScriptRunnerException;
-import com.lambdastack.go.executors.ArtifactsUploaderExecutor;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -24,7 +24,7 @@ public class ScriptRunner {
 
         System.out.println("Running script " + script + " in " + workingDir);
         while ((line = br.readLine()) != null) {
-            ArtifactsUploaderExecutor.logMessage(line);
+            ArtifactsUploader.log(line);
         }
         process.waitFor();
         if(process.exitValue() != 0) {

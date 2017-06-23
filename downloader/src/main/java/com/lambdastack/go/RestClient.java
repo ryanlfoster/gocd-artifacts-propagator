@@ -1,15 +1,10 @@
 package com.lambdastack.go;
 
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.HttpRequestInitializer;
-import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.lambdastack.go.core.DependencyResolver;
 import com.lambdastack.go.models.ValueStreamMap;
 import org.apache.http.HttpHost;
 import org.apache.http.client.fluent.Content;
@@ -32,7 +27,7 @@ import java.util.List;
 public class RestClient {
 
     public ValueStreamMap getValueStreamMapFromGoServer(String url) throws Exception {
-        DependencyResolver.logMessage("Trying URL: " + url);
+        ArtifactsDownloader.log("Trying URL: " + url);
         HttpRequestFactory httpRequestFactory = getHttpTransport().createRequestFactory(new HttpRequestInitializer() {
             @Override
             public void initialize(HttpRequest httpRequest) throws IOException {
@@ -49,7 +44,7 @@ public class RestClient {
 
     public List<String> getStageFeed(String goServerUrl, String stageLocator) throws Exception {
         String xmlUrl = goServerUrl + stageLocator + ".xml";
-        DependencyResolver.logMessage("Trying URL: " + xmlUrl);
+        ArtifactsDownloader.log("Trying URL: " + xmlUrl);
         InputSource inputSource = getJobFeedInputSourceFromGoServer(xmlUrl);
         NodeList nodeList = parseXMLDocument(inputSource, "/stage/jobs/job/@href");
         List<String> jobFeedURL = new ArrayList<String>();
@@ -60,7 +55,7 @@ public class RestClient {
     }
 
     public String getArtifactURLsFromJobFeed(String jobFeedURL) throws Exception {
-        DependencyResolver.logMessage("Trying URL: " + jobFeedURL);
+        ArtifactsDownloader.log("Trying URL: " + jobFeedURL);
         InputSource inputSource = getJobFeedInputSourceFromGoServer(jobFeedURL);
         return parseXMLDocument(inputSource, "/job/artifacts/@baseUri").item(0).getNodeValue();
     }
@@ -83,10 +78,10 @@ public class RestClient {
     protected InputSource getJobFeedInputSourceFromGoServer(String jobFeedURL) throws Exception {
         URL feedURL = new URL(jobFeedURL);
         Content content = Executor.newInstance()
-                                .auth(new HttpHost(feedURL.getHost(), feedURL.getPort()), "artifacts-propagator", "Helpdesk")
-                                .authPreemptive(new HttpHost(feedURL.getHost(), feedURL.getPort()))
-                                .execute(Request.Get(jobFeedURL)).returnContent();
-//        DependencyResolver.logMessage(content.asString());
+                .auth(new HttpHost(feedURL.getHost(), feedURL.getPort()), "artifacts-propagator", "Helpdesk")
+                .authPreemptive(new HttpHost(feedURL.getHost(), feedURL.getPort()))
+                .execute(Request.Get(jobFeedURL)).returnContent();
+//        ArtifactsDownloader.log(content.asString());
         return new InputSource(new StringReader(content.asString()));
     }
 }
